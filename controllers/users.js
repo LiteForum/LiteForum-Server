@@ -4,6 +4,7 @@ const res_state = require('../utils/response');
 const sha256 = require('../utils/sha256');
 const HashSuffix = require('../config');
 const { TokenSecretKey, ExpiresIn } = require("../config");
+const { v4: uuidv4 } = require('uuid');
 
 module.exports = {
     async login(ctx) {
@@ -65,6 +66,7 @@ module.exports = {
         }
 
         let user_data = {
+            id: uuidv4(),
             username: username,
             email: email,
             password: sha256(password + HashSuffix),
@@ -84,6 +86,17 @@ module.exports = {
     },
 
     async getUserInfo(ctx) {
-        const { id } = ctx.params;
+        const { username } = ctx.query;
+
+        if (username) {
+            let result = await UserModel.findOne({ username }, { password: 0, email: 0, __v: 0, _id: 0 });
+            if (result) {
+                ctx.body = res_state(true, "Request successful.", result);
+            } else {
+                return (ctx.body = res_state(false, "User Not Found.", {}));
+            }
+        } else {
+            ctx.body = res_state(false, "Missing parameter.", {});
+        }
     }
 }

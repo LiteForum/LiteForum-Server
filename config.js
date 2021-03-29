@@ -11,6 +11,7 @@ module.exports = {
     // 不需要鉴权的路由
     NoAuthRouters: [
         "/",
+        /\/storage/,
         /\/api\/register/,
         /\/api\/login/,
         /\/api\/users\/bar/,
@@ -54,5 +55,10 @@ module.exports = {
             apikey: "",
             from: ""
         },
-    }
+    },
+
+    Storage: {
+        // 存储驱动(local/其他暂未开发)
+        Drive: "local",
+    },
 }
