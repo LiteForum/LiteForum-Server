@@ -6,8 +6,9 @@ const UsersSchema = new mongoose.Schema(
     avatar: String,
     password: String,
     email_verify: Boolean,
-    create_time: Number,
-    last_online: Number,
+    last_online: Date,
+    createdAt: Date,
+    updatedAt: Date,
     authority: Number,
   },
   {

@@ -70,8 +70,7 @@ module.exports = {
             password: sha256(password + HashSuffix),
             avatar: null,
             email_verify: false,
-            create_time: Date.now(),
-            last_online: Date.now(),
+            last_online: new Date().getTime(),
             authority: 0,
         }
 
@@ -82,5 +81,9 @@ module.exports = {
         } else {
             ctx.body = res_state(false, "register has failed.", {});
         }
+    },
+
+    async getUserInfo(ctx) {
+        const { id } = ctx.params;
     }
 }

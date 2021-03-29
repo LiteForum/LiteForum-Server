@@ -7,7 +7,8 @@ const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const connectDB = require("./db/mongoose")
 const koajwt = require('koa-jwt')
-const { HashSuffix, TokenSecretKey, NoAuthRouters } = require('./config');
+const { TokenSecretKey, NoAuthRouters } = require('./config');
+const errorHandle = require('./utils/errorHandle');
 
 const index = require('./routes/index')
 const indexApi = require('./routes/api/index')
@@ -36,6 +37,8 @@ app.use(async (ctx, next) => {
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 })
 
+app.use(errorHandle)
+
 // routes
 app.use(koajwt({
   secret: TokenSecretKey
@@ -49,7 +52,7 @@ app.use(usersApi.routes(), usersApi.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {
-  console.error('server error', err)
+  console.error('server error', err, ctx)
 });
 
 connectDB().then(() => {
