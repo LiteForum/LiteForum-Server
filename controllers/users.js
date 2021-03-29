@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const UserModel = require('../model/users');
-const res_state = require('../Utils/response');
-const sha256 = require('../Utils/sha256');
+const res_state = require('../utils/response');
+const sha256 = require('../utils/sha256');
 const HashSuffix = require('../config');
 const { TokenSecretKey, ExpiresIn } = require("../config");
 
