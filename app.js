@@ -37,15 +37,17 @@ app.use(async (ctx, next) => {
   console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 })
 
+// 错误状态码拦截
 app.use(errorHandle)
 
-// routes
+// Jwt权限验证
 app.use(koajwt({
   secret: TokenSecretKey
 }).unless({
   path: NoAuthRouters
 }));
 
+// 路由
 app.use(index.routes(), index.allowedMethods())
 app.use(indexApi.routes(), indexApi.allowedMethods())
 app.use(usersApi.routes(), usersApi.allowedMethods())
