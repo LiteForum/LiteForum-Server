@@ -1,10 +1,13 @@
 const jwt = require("jsonwebtoken");
 const UserModel = require('../model/users');
+const EmailCaptchaModel = require('../model/emailCaptcha');
 const res_state = require('../utils/response');
 const sha256 = require('../utils/sha256');
 const HashSuffix = require('../config');
 const { TokenSecretKey, ExpiresIn, EmailVerify } = require("../config");
 const { v4: uuidv4 } = require('uuid');
+const makeEmailCaptcha = require('../utils/makeEmailCaptcha');
+
 
 module.exports = {
     async login(ctx) {
@@ -41,6 +44,27 @@ module.exports = {
         ctx.body = res_state(true, null, {
             token: token
         });
+    },
+
+    // 提交代码验证邮件地址
+    async verifyEmailCaptcha(ctx) {
+        const { code } = ctx.request.body;
+
+        if (code) {
+            let code_find = await EmailCaptchaModel.findOne({ code });
+
+            if (code_find && code_find.code === code) {
+                let update = await UserModel.findOneAndUpdate(code_find.username, { email_verify: true })
+                if (update) {
+                    await EmailCaptchaModel.findOneAndRemove({ code })
+                    ctx.body = res_state(true, "Verification successful.", {});
+                }
+            } else {
+                ctx.body = res_state(false, "Validation failed, code does not exist.", {});
+            }
+        } else {
+            ctx.body = res_state(false, "Missing parameter.", {});
+        }
     },
 
     async register(ctx) {
@@ -97,6 +121,7 @@ module.exports = {
         let create = await UserModel.create(user_data);
 
         if (create) {
+            await makeEmailCaptcha(username, email);
             ctx.body = res_state(true, "register was successful.", {});
         } else {
             ctx.body = res_state(false, "register has failed.", {});
@@ -133,5 +158,5 @@ module.exports = {
                 ctx.body = res_state(false, "Missing parameter.", {});
             }
         }
-    }
+    },
 }

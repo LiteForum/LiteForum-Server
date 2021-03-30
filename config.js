@@ -8,7 +8,7 @@ module.exports = {
     // Token有效时长
     ExpiresIn: "2d",
     // 是否需要邮件验证
-    EmailVerify: false,
+    EmailVerify: true,
 
     // 不需要鉴权的路由
     NoAuthRouters: [
@@ -16,6 +16,7 @@ module.exports = {
         /\/storage/,
         /\/uploads/,
         /\/uploads\/(.*)/,
+        /\/email\/verify/,
         /\/api\/register/,
         /\/api\/login/,
         /\/api\/users\/info/,

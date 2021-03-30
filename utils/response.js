@@ -1,3 +1,4 @@
+// 错误信息封装
 let res_state = (success, msg, data) => {
     let result;
     if(success) {

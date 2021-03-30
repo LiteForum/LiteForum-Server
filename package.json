@@ -24,7 +24,9 @@
     "koa-static": "^5.0.0",
     "koa-views": "^6.2.0",
     "koa2-cors": "^2.0.6",
+    "mailgun-js": "^0.22.0",
     "mongoose": "^5.12.2",
+    "nodemailer": "^6.5.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {}
