@@ -12,6 +12,8 @@ module.exports = {
     NoAuthRouters: [
         "/",
         /\/storage/,
+        /\/uploads/,
+        /\/uploads\/(.*)/,
         /\/api\/register/,
         /\/api\/login/,
         /\/api\/users\/bar/,
