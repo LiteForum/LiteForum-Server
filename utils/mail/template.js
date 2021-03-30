@@ -4,7 +4,7 @@ const ejs = require("ejs");
 
 let temp2html = async (title, content) => {
     const fileContent = await new Promise((resolve, reject) => {
-        return fs.readFile("./utils/mail/templates/mail.ejs", { encoding: 'utf8' }, (err, data) => {
+        return fs.readFile(__dirname + "/utils/mail/templates/mail.ejs", { encoding: 'utf8' }, (err, data) => {
             return resolve(data);
         });
     });

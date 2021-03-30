@@ -8,7 +8,6 @@ let mailgunSend = (title, email, content) => {
         subject: title,
         html: content
     };
-    console.log(content)
 
     const mg = mailgun({ apiKey: Mail.mailgun.apikey, domain: Mail.mailgun.domain });
     mg.messages().send(data, function (error, body) {
