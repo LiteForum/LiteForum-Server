@@ -31,7 +31,7 @@ module.exports = {
             return (ctx.body = res_state(false, "Password Error.", {}));
         }
 
-        if(EmailVerify && !result.email_verify) {
+        if (EmailVerify && !result.email_verify) {
             return (ctx.body = res_state(false, "Please verify the email address first.", {}));
         }
 
@@ -104,8 +104,6 @@ module.exports = {
     },
 
     async getUserInfo(ctx) {
-
-        console.log(ctx.state.user)
         const { username } = ctx.query;
 
         if (username) {
@@ -116,14 +114,21 @@ module.exports = {
                 return (ctx.body = res_state(false, "User Not Found.", {}));
             }
         } else {
-            if (ctx.state.user) {
-                let result = await UserModel.findOne({ username: ctx.state.user.username }, { password: 0, email: 0, __v: 0, _id: 0 });
+            if (ctx.request.header.authorization) {
+                let token = ctx.request.header.authorization.split(" ");
+                await jwt.verify(token[1], TokenSecretKey, async function (err, decoded) {
+                    if (decoded) {
+                        let result = await UserModel.findOne({ username: decoded.username }, { password: 0, email: 0, __v: 0, _id: 0 });
 
-                if (result) {
-                    ctx.body = res_state(true, "Request successful.", result);
-                } else {
-                    return (ctx.body = res_state(false, "User Not Found.", {}));
-                }
+                        if (result) {
+                            ctx.body = res_state(true, "Request successful.", result);
+                        }
+                    }
+
+                    if (err) {
+                        ctx.body = res_state(false, "Missing parameter or token invalid.", {});
+                    }
+                });
             } else {
                 ctx.body = res_state(false, "Missing parameter.", {});
             }

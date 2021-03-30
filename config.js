@@ -18,7 +18,7 @@ module.exports = {
         /\/uploads\/(.*)/,
         /\/api\/register/,
         /\/api\/login/,
-        /\/api\/users\/bar/,
+        /\/api\/users\/info/,
     ],
 
     // 数据库配置
