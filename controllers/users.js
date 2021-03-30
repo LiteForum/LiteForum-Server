@@ -11,6 +11,14 @@ module.exports = {
         const { username, email, password } = ctx.request.body;
 
         let result = await UserModel.findOne({ $or: [{ username }, { email }] });
+
+        username_re = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]");
+
+        // 用户名特殊字符
+        if(username_re.test(username)) {
+            return (ctx.body = res_state(false, "The user name cannot have special characters.", {}));
+        }
+
         // 用户不存在
         if (!result) {
             return (ctx.body = res_state(false, "User Not Found.", {}));
@@ -35,6 +43,12 @@ module.exports = {
         const { username, email, password } = ctx.request.body;
 
         email_re = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/;
+
+        username_re = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]");
+
+        if(username_re.test(username)) {
+            return (ctx.body = res_state(false, "The user name cannot have special characters.", {}));
+        }
 
         // 用户名小于4位
         if (username.length < 4) {
