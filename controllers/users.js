@@ -3,7 +3,7 @@ const UserModel = require('../model/users');
 const res_state = require('../utils/response');
 const sha256 = require('../utils/sha256');
 const HashSuffix = require('../config');
-const { TokenSecretKey, ExpiresIn } = require("../config");
+const { TokenSecretKey, ExpiresIn, EmailVerify } = require("../config");
 const { v4: uuidv4 } = require('uuid');
 
 module.exports = {
@@ -15,7 +15,7 @@ module.exports = {
         username_re = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]");
 
         // 用户名特殊字符
-        if(username_re.test(username)) {
+        if (username_re.test(username)) {
             return (ctx.body = res_state(false, "The user name cannot have special characters.", {}));
         }
 
@@ -29,6 +29,10 @@ module.exports = {
             ctx.status = 400;
 
             return (ctx.body = res_state(false, "Password Error.", {}));
+        }
+
+        if(EmailVerify && !result.email_verify) {
+            return (ctx.body = res_state(false, "Please verify the email address first.", {}));
         }
 
         const user = { username: result.username, authority: result.authority };
@@ -46,7 +50,7 @@ module.exports = {
 
         username_re = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]");
 
-        if(username_re.test(username)) {
+        if (username_re.test(username)) {
             return (ctx.body = res_state(false, "The user name cannot have special characters.", {}));
         }
 
@@ -100,6 +104,8 @@ module.exports = {
     },
 
     async getUserInfo(ctx) {
+
+        console.log(ctx.state.user)
         const { username } = ctx.query;
 
         if (username) {
@@ -110,7 +116,17 @@ module.exports = {
                 return (ctx.body = res_state(false, "User Not Found.", {}));
             }
         } else {
-            ctx.body = res_state(false, "Missing parameter.", {});
+            if (ctx.state.user) {
+                let result = await UserModel.findOne({ username: ctx.state.user.username }, { password: 0, email: 0, __v: 0, _id: 0 });
+
+                if (result) {
+                    ctx.body = res_state(true, "Request successful.", result);
+                } else {
+                    return (ctx.body = res_state(false, "User Not Found.", {}));
+                }
+            } else {
+                ctx.body = res_state(false, "Missing parameter.", {});
+            }
         }
     }
 }

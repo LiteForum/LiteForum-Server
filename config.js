@@ -7,6 +7,8 @@ module.exports = {
     TokenSecretKey: "AhzMFWSGrFtQOuzIYJgU",
     // Token有效时长
     ExpiresIn: "2d",
+    // 是否需要邮件验证
+    EmailVerify: false,
 
     // 不需要鉴权的路由
     NoAuthRouters: [
