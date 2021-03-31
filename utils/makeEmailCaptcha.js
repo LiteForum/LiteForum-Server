@@ -18,7 +18,7 @@ let makeEmailCaptcha = async (username, email) => {
         let create = await EmailCaptchaModel.create(code_data);
 
         if (create) {
-            await sendMail("Verify Email Address", email, "Your verification code is: " + code);
+            await sendMail("Verify Email Address", email, "Hello! " + username + ", Your verification code is: " + code + ". If you did not initiate the registration request, please ignore this message.");
         } else {
             console.error("Email Code Make Error.");
         }
