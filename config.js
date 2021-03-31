@@ -1,4 +1,5 @@
 module.exports = {
+    AppName: "Lite",
     AppKey: "f65c08b4-db7d-41ee-934b-80fd668af505",
 
     // 密码加盐（请保证此值拥有随机性）
@@ -45,7 +46,7 @@ module.exports = {
         smtp: {
             host: "",
             port: 578,
-            // 如果为true, 端口请更改为456
+            // 如果为true, 端口请更改为456 （默认578）
             secure: false,
             // 用于SMTP鉴权的用户账户与密码
             user: "",

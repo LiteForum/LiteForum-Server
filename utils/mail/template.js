@@ -1,8 +1,10 @@
 // 邮件模板生成
 const fs = require('fs');
 const ejs = require("ejs");
+const { AppName } = require('../../config');
 
 let temp2html = async (title, content) => {
+    console.log(__dirname)
     const fileContent = await new Promise((resolve, reject) => {
         return fs.readFile(__dirname + "/templates/mail.ejs", { encoding: 'utf8' }, (err, data) => {
             return resolve(data);
@@ -11,7 +13,8 @@ let temp2html = async (title, content) => {
 
     let info = {
         title,
-        content
+        content,
+        appname: AppName
     }
 
     if (fileContent) {
