@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const { Mail } = require('../../config');
 
-let smtpSend = (title, email, content) => {
+let smtpSend = async (title, email, content) => {
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
         host: Mail.smtp.host,
@@ -14,21 +14,21 @@ let smtpSend = (title, email, content) => {
     });
 
     // send mail with defined transport object
-    let info = transporter.sendMail({
+    let info = await transporter.sendMail({
         from: Mail.smtp.from, // sender address
         to: email, // list of receivers
         subject: title, // Subject line
         html: content // html body
     });
 
-    // send mail with defined transport object
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.log(error);
+    transporter.sendMail(info, (err, info) => {
+        if (err) {
+            console.log("Error occurred. " + err.message);
         }
 
-        //console.log('Message sent: %s', info.messageId);
-        // Message sent: <04ec7731-cc68-1ef6-303c-61b0f796b78f@qq.com>
+        console.log("Message sent: %s", info.messageId);
+        // Preview only available when sending through an Ethereal account
+        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
     });
 }
 
