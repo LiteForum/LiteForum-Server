@@ -13,14 +13,14 @@ module.exports = {
     async login(ctx) {
         const { username, email, password } = ctx.request.body;
 
-        let result = await UserModel.findOne({ $or: [{ username }, { email }] });
-
         username_re = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]");
 
         // 用户名特殊字符
         if (username_re.test(username)) {
             return (ctx.body = res_state(false, "The user name cannot have special characters.", {}));
         }
+
+        let result = await UserModel.findOneAndUpdate({ $or: [{ username }, { email }] }, { last_online: new Date().getTime() })
 
         // 用户不存在
         if (!result) {
