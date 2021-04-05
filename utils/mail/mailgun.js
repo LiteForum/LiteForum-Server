@@ -11,7 +11,7 @@ let mailgunSend = (title, email, content) => {
         };
 
         const mg = mailgun({ apiKey: Mail.mailgun.apikey, domain: Mail.mailgun.domain });
-        mg.messages().send(data, function (error, body) {
+        mg.messages().send(data, (error, body) => {
             if (!error) {
                 console.log(body);
                 resolve({

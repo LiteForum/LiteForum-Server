@@ -87,7 +87,7 @@ app.use(koajwt({
 // 跨域
 app.use(
   cors({
-    origin: function (ctx) { //设置允许来自指定域名请求
+    origin: (ctx) => { //设置允许来自指定域名请求
       return "*"
     },
     maxAge: 5, //指定本次预检请求的有效期，单位为秒。

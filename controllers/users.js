@@ -183,7 +183,7 @@ module.exports = {
         } else {
             if (ctx.request.header.authorization) {
                 let token = ctx.request.header.authorization.split(" ");
-                await jwt.verify(token[1], TokenSecretKey, async function (err, decoded) {
+                await jwt.verify(token[1], TokenSecretKey, async (err, decoded) => {
                     if (decoded) {
                         let result = await UserModel.findOne({ username: decoded.username }, { password: 0, email: 0, __v: 0, _id: 0 });
 
