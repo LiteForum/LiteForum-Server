@@ -34,10 +34,6 @@ module.exports = {
             return (ctx.body = res_state(false, "Password Error.", {}));
         }
 
-        if (EmailVerify && !result.email_verify) {
-            return (ctx.body = res_state(false, "Please verify the email address first.", {}));
-        }
-
         const user = { username: result.username, authority: result.authority };
         const token = jwt.sign(user, TokenSecretKey, { expiresIn: ExpiresIn });
 
@@ -46,21 +42,60 @@ module.exports = {
         });
     },
 
-    // 提交代码验证邮件地址
-    async verifyEmailCaptcha(ctx) {
-        const { code } = ctx.request.body;
+    // 发送注册验证码
+    async verifyEmailCaptchaSend(ctx) {
+        const { username, email } = ctx.request.body;
 
-        if (code) {
-            let code_find = await EmailCaptchaModel.findOne({ code });
+        if (username && email) {
+            let result = await EmailCaptchaModel.findOne({ $or: [{ username }, { email }] });
+            if (result) {
+                await EmailCaptchaModel.findOneAndRemove({ $or: [{ username }, { email }] });
+            }
 
-            if (code_find && code_find.code === code) {
-                let update = await UserModel.findOneAndUpdate(code_find.username, { email_verify: true })
-                if (update) {
-                    await EmailCaptchaModel.findOneAndRemove({ code })
-                    ctx.body = res_state(true, "Verification successful.", {});
+            await makeEmailCaptcha(username, email, "Register").then(callback => {
+                return (ctx.body = res_state(false, "Send Success.", {}));
+            }).catch(callback => {
+                return (ctx.body = res_state(false, "Send Error.", {}));
+            })
+        } else {
+            ctx.body = res_state(false, "Missing parameter.", {});
+        }
+    },
+
+    // 发送找回密码验证码
+    async iForgotCaptchaSend(ctx) {
+        const { email } = ctx.request.body;
+
+        if (email) {
+            let result = await EmailCaptchaModel.findOne({ email });
+            if (result) {
+                await EmailCaptchaModel.findOneAndRemove({ email });
+            }
+
+            await makeEmailCaptcha(null, email, "iForgot").then(callback => {
+                return (ctx.body = res_state(false, "Send Success.", {}));
+            }).catch(callback => {
+                return (ctx.body = res_state(false, "Send Error.", {}));
+            })
+        } else {
+            ctx.body = res_state(false, "Missing parameter.", {});
+        }
+    },
+
+    async iForgot(ctx) {
+        const { email, code, password } = ctx.request.body;
+        if (email, code, password) {
+            let result = await EmailCaptchaModel.findOneAndRemove({ $or: [{ email }, { code }] });
+
+            if (result) {
+                let result2 = await UserModel.findOneAndUpdate(email, { password: sha256(password + HashSuffix) })
+                if (result2) {
+                    ctx.body = res_state(true, "Password reset successful.", {});
+                } else {
+                    ctx.body = res_state(false, "Password reset failed.", {});
                 }
             } else {
-                ctx.body = res_state(false, "Validation failed, code does not exist.", {});
+                ctx.body = res_state(false, "Validation failed.", {});
             }
         } else {
             ctx.body = res_state(false, "Missing parameter.", {});
@@ -68,7 +103,7 @@ module.exports = {
     },
 
     async register(ctx) {
-        const { username, email, password } = ctx.request.body;
+        const { username, email, password, code } = ctx.request.body;
 
         email_re = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/;
 
@@ -118,10 +153,17 @@ module.exports = {
             authority: 0,
         }
 
+        let code_find = await EmailCaptchaModel.findOneAndRemove({ code })
+
+        if (EmailVerify && !code_find) {
+            return (ctx.body = res_state(false, "Validation failed, code does not exist.", {}));
+        } else {
+            user_data.email_verify = true;
+        }
+
         let create = await UserModel.create(user_data);
 
         if (create) {
-            await makeEmailCaptcha(username, email);
             ctx.body = res_state(true, "register was successful.", {});
         } else {
             ctx.body = res_state(false, "register has failed.", {});

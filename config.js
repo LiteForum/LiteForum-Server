@@ -18,6 +18,8 @@ module.exports = {
         /\/uploads/,
         /\/uploads\/(.*)/,
         /\/email\/verify/,
+        /\/iforgot/,
+        /\/iforgot\/(.*)/,
         /\/api\/register/,
         /\/api\/login/,
         /\/api\/users\/info/,

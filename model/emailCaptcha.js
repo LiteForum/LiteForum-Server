@@ -5,6 +5,7 @@ const EmailCaptchaSchema = new mongoose.Schema(
         username: String,
         email: String,
         code: String,
+        code_type: String,
     },
     {
         timestamps: true,

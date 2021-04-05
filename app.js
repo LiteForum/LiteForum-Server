@@ -1,5 +1,6 @@
 const Koa = require('koa')
 const app = new Koa()
+const helmet = require('koa-helmet')
 const views = require('koa-views')
 const json = require('koa-json')
 const koaBody = require('koa-body')
@@ -25,6 +26,7 @@ const usersApi = require('./routes/api/users')
 // onerror(app)
 
 // middlewares
+app.use(helmet());
 app.use(bodyparser())
 app.use(json())
 app.use(logger())
