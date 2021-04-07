@@ -53,7 +53,7 @@ module.exports = {
             }
 
             await makeEmailCaptcha(username, email, "Register").then(callback => {
-                return (ctx.body = res_state(false, "Send Success.", {}));
+                return (ctx.body = res_state(true, "Send Success.", {}));
             }).catch(callback => {
                 return (ctx.body = res_state(false, "Send Error.", {}));
             })
@@ -73,7 +73,7 @@ module.exports = {
             }
 
             await makeEmailCaptcha(null, email, "iForgot").then(callback => {
-                return (ctx.body = res_state(false, "Send Success.", {}));
+                return (ctx.body = res_state(true, "Send Success.", {}));
             }).catch(callback => {
                 return (ctx.body = res_state(false, "Send Error.", {}));
             })
