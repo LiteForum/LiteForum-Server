@@ -2,9 +2,9 @@ module.exports = {
     AppName: "Lite",
     AppKey: "f65c08b4-db7d-41ee-934b-80fd668af505",
 
-    // 密码加盐（请保证此值拥有随机性）
+    // 密码加盐（请保证此值拥有随机性，并且在第一次克隆本项目时更换此值）
     HashSuffix: "A1GuChlfN9Q4tJeDWIhr",
-    // Token签发加密Key（请保证此值拥有随机性）
+    // Token签发加密Key（请保证此值拥有随机性，并且在第一次克隆本项目时更换此值）
     TokenSecretKey: "AhzMFWSGrFtQOuzIYJgU",
     // Token有效时长
     ExpiresIn: "2d",
