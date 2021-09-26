@@ -13,7 +13,7 @@ module.exports = {
                 ctx.fail("Bind Failed. Code Not Found.", -1)
             } else {
                 let db = await OAuthModel.findOne({ id: ctx.state.user.id })
-                if (db.wechatopenid !== "" || db.wechatunionid !== "") {
+                if (db.wechatopenid === "" || db.wechatunionid === "") {
                     let db2 = await OAuthModel.findOneAndUpdate({ id: ctx.state.user.id }, { $set: { wechatopenid: res.openid, wechatunionid: res.unionid ? res.unionid : "" } })
                     
                     if(db2) {
