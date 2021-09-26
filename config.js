@@ -17,11 +17,12 @@ module.exports = {
         /\/storage/,
         /\/uploads/,
         /\/uploads\/(.*)/,
-        /\/email\/verify/,
-        /\/iforgot/,
-        /\/iforgot\/(.*)/,
+        /\/api\/email\/verify/,
+        /\/api\/iforgot/,
+        /\/api\/iforgot\/(.*)/,
         /\/api\/register/,
         /\/api\/login/,
+        /\/api\/users\/oauth\/login\/(.*)/,
         /\/api\/users\/info/,
     ],
 
@@ -45,7 +46,7 @@ module.exports = {
         Drive: "mailgun",
 
         // 配置SMTP
-        smtp: {
+        Smtp: {
             host: "",
             port: 578,
             // 如果为true, 端口请更改为456 （默认578）
@@ -58,10 +59,18 @@ module.exports = {
         },
 
         // 配置Mailgum
-        mailgun: {
+        Mailgun: {
             domain: "sp.kilins.com",
             apikey: "key-1deb9b49d17e85af42c3b731e0bb68f6",
             from: "noreply@kilins.com"
+        },
+    },
+
+    Auth: {
+        Wechat_MiniProgram: {
+            Enable: true,
+            AppID: "wxae5993309bc59354",
+            AppSecret: "684f1d7824e8d0a219a325b5238c3e1d"
         },
     },
 

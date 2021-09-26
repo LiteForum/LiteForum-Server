@@ -1,26 +1,26 @@
-const jwt = require("jsonwebtoken");
-const UserModel = require('../model/users');
-const EmailCaptchaModel = require('../model/emailCaptcha');
-const res_state = require('../utils/response');
-const sha256 = require('../utils/sha256');
-const HashSuffix = require('../config');
-const { TokenSecretKey, ExpiresIn, EmailVerify } = require("../config");
-const { v4: uuidv4 } = require('uuid');
-const makeEmailCaptcha = require('../utils/makeEmailCaptcha');
+const jwt = require("jsonwebtoken")
+const UserModel = require('../../model/users')
+const OAuthModel = require('../../model/oauth')
+const EmailCaptchaModel = require('../../model/emailCaptcha')
+const sha256 = require('../../utils/sha256')
+const HashSuffix = require('../../config')
+const { TokenSecretKey, ExpiresIn, EmailVerify } = require("../../config")
+const { v4: uuidv4 } = require('uuid')
+const makeEmailCaptcha = require('../../utils/makeEmailCaptcha')
 
 
 module.exports = {
     async login(ctx) {
-        const { username, email, password } = ctx.request.body;
+        const { username, email, password } = ctx.request.body
 
-        username_re = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]");
+        username_re = new RegExp("[`~!@#$^&*()=|{}':',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]")
 
         // 用户名特殊字符
         if (username_re.test(username)) {
             ctx.fail('The user name cannot have special characters.', -1)
         }
 
-        let result = await UserModel.findOneAndUpdate({ $or: [{ username }, { email }] }, { last_online: new Date().getTime() })
+        let result = await UserModel.findOne({ $or: [{ username }, { email }] })
 
         // 用户不存在
         if (!result) {
@@ -31,8 +31,9 @@ module.exports = {
             if (sha256(password + HashSuffix) !== result.password) {
                 ctx.fail('Password Error.', -1)
             } else {
-                const user = { username: result.username, authority: result.authority };
-                const token = jwt.sign(user, TokenSecretKey, { expiresIn: ExpiresIn });
+                await UserModel.updateOne({ $or: [{ username }, { email }] }, { last_online: new Date().getTime() })
+                const user = { id: result.id, username: result.username, authority: result.authority }
+                const token = jwt.sign(user, TokenSecretKey, { expiresIn: ExpiresIn })
                 ctx.success({
                     token: token
                 })
@@ -41,12 +42,12 @@ module.exports = {
 
     // 发送注册验证码
     async verifyEmailCaptchaSend(ctx) {
-        const { username, email } = ctx.request.body;
+        const { username, email } = ctx.request.body
 
         if (username && email) {
-            let result = await EmailCaptchaModel.findOne({ $or: [{ username }, { email }] });
+            let result = await EmailCaptchaModel.findOne({ $or: [{ username }, { email }] })
             if (result) {
-                await EmailCaptchaModel.findOneAndRemove({ $or: [{ username }, { email }] });
+                await EmailCaptchaModel.findOneAndRemove({ $or: [{ username }, { email }] })
             }
 
             await makeEmailCaptcha(username, email, "Register").then(callback => {
@@ -61,12 +62,12 @@ module.exports = {
 
     // 发送找回密码验证码
     async iForgotCaptchaSend(ctx) {
-        const { email } = ctx.request.body;
+        const { email } = ctx.request.body
 
         if (email) {
-            let result = await EmailCaptchaModel.findOne({ email });
+            let result = await EmailCaptchaModel.findOne({ email })
             if (result) {
-                await EmailCaptchaModel.findOneAndRemove({ email });
+                await EmailCaptchaModel.findOneAndRemove({ email })
             }
 
             await makeEmailCaptcha(null, email, "iForgot").then(callback => {
@@ -80,9 +81,9 @@ module.exports = {
     },
 
     async iForgot(ctx) {
-        const { email, code, password } = ctx.request.body;
+        const { email, code, password } = ctx.request.body
         if (email, code, password) {
-            let result = await EmailCaptchaModel.findOneAndRemove({ $or: [{ email }, { code }] });
+            let result = await EmailCaptchaModel.findOneAndRemove({ $or: [{ email }, { code }] })
 
             if (result) {
                 let result2 = await UserModel.findOneAndUpdate(email, { password: sha256(password + HashSuffix) })
@@ -100,11 +101,11 @@ module.exports = {
     },
 
     async register(ctx) {
-        const { username, email, password, code } = ctx.request.body;
+        const { username, email, password, code } = ctx.request.body
 
-        email_re = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/;
+        email_re = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/
 
-        username_re = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]");
+        username_re = new RegExp("[`~!@#$^&*()=|{}':',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]")
 
         if (username_re.test(username)) {
             ctx.fail("The user name cannot have special characters.", -1)
@@ -115,22 +116,24 @@ module.exports = {
         } else if (!email_re.test(email)) {
             ctx.fail("Incorrect email address format.", -1)
         } else {
-            let user_find = await UserModel.findOne({ username });
+            let user_find = await UserModel.findOne({ username })
 
             if (user_find) {
                 ctx.fail("User already exists.", -1)
             }
 
-            let email_find = await UserModel.findOne({ email });
+            let email_find = await UserModel.findOne({ email })
             console.log(email_find)
 
             if (email_find) {
                 ctx.fail("Email address registered.", -1)
             }
 
-            if(!user_find && !email_find) {
+            let id = uuidv4()
+
+            if (!user_find && !email_find) {
                 let user_data = {
-                    id: uuidv4(),
+                    id: id,
                     username: username,
                     email: email,
                     password: sha256(password + HashSuffix),
@@ -139,17 +142,20 @@ module.exports = {
                     last_online: new Date().getTime(),
                     authority: 0,
                 }
-    
+
                 let code_find = await EmailCaptchaModel.findOneAndRemove({ code })
-    
+
                 if (EmailVerify && !code_find) {
                     ctx.fail("Validation failed, code does not exist.", -1)
                 } else {
-                    user_data.email_verify = true;
+                    user_data.email_verify = true
                 }
-    
-                let create = await UserModel.create(user_data);
-    
+
+                let create = await UserModel.create(user_data)
+                await OAuthModel.create({
+                    id: id,
+                })
+
                 if (create) {
                     ctx.success({}, "register was successful.")
                 } else {
@@ -160,10 +166,10 @@ module.exports = {
     },
 
     async getUserInfo(ctx) {
-        const { username } = ctx.query;
+        const { username } = ctx.query
 
         if (username) {
-            let result = await UserModel.findOne({ username }, { password: 0, email: 0, __v: 0, _id: 0 });
+            let result = await UserModel.findOne({ username }, { password: 0, email: 0, __v: 0, _id: 0 })
             if (result) {
                 ctx.success(result, "Request successful.")
             } else {
@@ -171,10 +177,10 @@ module.exports = {
             }
         } else {
             if (ctx.request.header.authorization) {
-                let token = ctx.request.header.authorization.split(" ");
+                let token = ctx.request.header.authorization.split(" ")
                 await jwt.verify(token[1], TokenSecretKey, async (err, decoded) => {
                     if (decoded) {
-                        let result = await UserModel.findOne({ username: decoded.username }, { password: 0, email: 0, __v: 0, _id: 0 });
+                        let result = await UserModel.findOne({ username: decoded.username }, { password: 0, email: 0, __v: 0, _id: 0 })
 
                         if (result) {
                             ctx.success(result, "Request successful.")
@@ -184,7 +190,7 @@ module.exports = {
                     if (err) {
                         ctx.fail("Missing parameter or token invalid.", -1)
                     }
-                });
+                })
             } else {
                 ctx.fail('Missing parameter.', -1)
             }

@@ -4,13 +4,13 @@ const { Mail } = require('../../config');
 let mailgunSend = (title, email, content) => {
     return new Promise((resolve, reject) => {
         const data = {
-            from: Mail.mailgun.from,
+            from: Mail.Mailgun.from,
             to: email,
             subject: title,
             html: content
         };
 
-        const mg = mailgun({ apiKey: Mail.mailgun.apikey, domain: Mail.mailgun.domain });
+        const mg = mailgun({ apiKey: Mail.Mailgun.apikey, domain: Mail.Mailgun.domain });
         mg.messages().send(data, (error, body) => {
             if (!error) {
                 console.log(body);
