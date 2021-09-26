@@ -71,7 +71,7 @@ module.exports = {
             if (res.errcode && res.errcode !== 0) {
                 ctx.fail("Login Failed. Code Not Found.", -1)
             } else {
-                let db = await OAuthModel.findOne({ $or: [{ 'wechat.openid': res.openid }, { 'wechat.unionid': res.unionid }] })
+                let db = await OAuthModel.findOne({ 'wechat.openid': res.openid })
                 if (db !== null || ((db.wechat.openid !== "" || db.wechat.unionid !== "") && db.wechat.sessionkey !== "")) {
                     let db2 = await UserModel.findOneAndUpdate({ id: db.id }, { last_online: new Date().getTime() })
 
