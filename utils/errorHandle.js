@@ -4,15 +4,15 @@ let errorHandle = (ctx, next) => {
             ctx.status = 401;
             ctx.body = {
                 success: false,
-                errcode: err.status,
-                error: err.originalError ? err.originalError.message : err.message,
+                code: err.status,
+                msg: err.originalError ? err.originalError.message : err.message,
             };
         } else
             if (err.status !== 200) {
                 ctx.body = {
                     success: false,
-                    errcode: err.status,
-                    error: err.originalError ? err.originalError.message : err.message,
+                    code: err.status,
+                    msg: err.originalError ? err.originalError.message : err.message,
                 };
             } else {
                 throw err;

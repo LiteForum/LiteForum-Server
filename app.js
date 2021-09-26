@@ -57,8 +57,8 @@ app.use(async (ctx, next) => {
 })
 
 // 错误状态码拦截
+app.use(errorHandle)
 app.use(routerResponse())
-//app.use(errorHandle())
 
 // Jwt权限验证
 app.use(koajwt({
