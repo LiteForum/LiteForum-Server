@@ -66,7 +66,9 @@ module.exports = {
         },
     },
 
+    // 第三方登入配置
     Auth: {
+        // 微信小程序授权登入基本配置
         Wechat_MiniProgram: {
             Enable: true,
             AppID: "wxae5993309bc59354",
