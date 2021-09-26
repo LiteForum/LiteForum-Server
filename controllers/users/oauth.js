@@ -13,10 +13,16 @@ module.exports = {
                 ctx.fail("Bind Failed. Code Not Found.", -1)
             } else {
                 let db = await OAuthModel.findOne({ id: ctx.state.user.id })
-                if (db.wechatopenid === "" || db.wechatunionid === "") {
-                    let db2 = await OAuthModel.findOneAndUpdate({ id: ctx.state.user.id }, { $set: { wechatopenid: res.openid, wechatunionid: res.unionid ? res.unionid : "" } })
-                    
-                    if(db2) {
+                if (Object.keys(db.wechat).length === 0 || (db.wechat.openid === "" && db.wechat.unionid === "" && db.wechat.sessionkey === "")) {
+                    let wechat = {
+                        openid: res.openid,
+                        unionid: res.unionid ? res.unionid : "",
+                        sessionkey: res.session_key
+                    }
+
+                    let db2 = await OAuthModel.findOneAndUpdate({ id: ctx.state.user.id }, { $set: { wechat: wechat } }, { multi: true })
+
+                    if (db2) {
                         ctx.success({}, "Bind Success.")
                     } else {
                         ctx.fail({}, "Bind Failed.", -1)
@@ -33,17 +39,18 @@ module.exports = {
 
     async wechat_auth_unbind(ctx) {
         const { code } = ctx.request.body
-        
+
         await wechatmini(code).then(async (res) => {
-            if(res.errcode && res.errcode !== 0) {
+            if (res.errcode && res.errcode !== 0) {
                 ctx.fail("UnBind Failed. Code Not Found.", -1)
             } else {
                 let db = await OAuthModel.findOne({ id: ctx.state.user.id })
+                console.log(db)
 
-                if(db.wechatopenid !== "" || db.wechatunionid !== "") {
-                    let db2 = await OAuthModel.updateOne({ id: ctx.state.user.id }, { $set: { wechatopenid: "", wechatunionid: "" } })
+                if (db.wechat.openid !== "" || db.wechat.unionid !== "" || db.wechat.sessionkey !== "") {
+                    let db2 = await OAuthModel.updateOne({ id: ctx.state.user.id }, { $set: { wechat: {} } })
 
-                    if(db2) {
+                    if (db2) {
                         ctx.success({}, "UnBind Success.")
                     } else {
                         ctx.fail("UnBind Failed.", -1)
@@ -64,9 +71,8 @@ module.exports = {
             if (res.errcode && res.errcode !== 0) {
                 ctx.fail("Login Failed. Code Not Found.", -1)
             } else {
-                let db = await OAuthModel.findOne({ $or: [{ wechatopenid: res.openid }, { wechatunionid: res.unionid }] })
-
-                if (db) {
+                let db = await OAuthModel.findOne({ $or: [{ 'wechat.openid': res.openid }, { 'wechat.unionid': res.unionid }] })
+                if (db !== null || ((db.wechat.openid !== "" || db.wechat.unionid !== "") && db.wechat.sessionkey !== "")) {
                     let db2 = await UserModel.findOneAndUpdate({ id: db.id }, { last_online: new Date().getTime() })
 
                     if (db2) {

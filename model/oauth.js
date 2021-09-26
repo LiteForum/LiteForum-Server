@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 const OAuthSchema = new mongoose.Schema(
     {
         id: String,
-        wechatopenid: {
-            type: String,
-            default: "",
+        wechat: {
+            type: Object,
+            default: {
+                openid: "",
+                unionid: "",
+                sessionkey: "",
+            }
         },
-        wechatunionid: {
-            type: String,
-            default: "",
-        }
     },
     {
         timestamps: true,
