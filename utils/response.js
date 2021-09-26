@@ -1,21 +1,29 @@
 // 错误信息封装
-let res_state = (success, msg, data) => {
-    let result;
-    if(success) {
-        result = {
-            success: success,
-            msg: msg ? msg : "Request successful.",
-            data: data
+let routerResponse = (option={}) => {
+    return async function(ctx,next){
+        ctx.success = function (data,msg) {
+            ctx.type = option.type || 'json'
+            ctx.body = {
+                success: true,
+                code : option.successCode || 0,
+                msg : msg,
+                data : data
+            }
         }
-    } else {
-        result = {
-            success: success,
-            msg: msg ? msg : "Request error.",
-            data: data
+ 
+        ctx.fail = function (msg,code) {
+            ctx.type = option.type || 'json'
+            ctx.body = {
+                success: false,
+                code : code || option.failCode || 99,
+                msg : msg || option.successMsg || 'fail',
+            }
+            // console.log(ctx.body)
         }
+ 
+       await next()
     }
-
-    return result;
+ 
 }
 
-module.exports = res_state
+module.exports = routerResponse

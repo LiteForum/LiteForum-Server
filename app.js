@@ -13,6 +13,7 @@ const connectDB = require("./db/mongoose")
 const koajwt = require('koa-jwt')
 const { TokenSecretKey, NoAuthRouters } = require('./config');
 const errorHandle = require('./utils/errorHandle');
+const routerResponse = require('./utils/response');
 const checkDirExist = require('./utils/Upload/checkDirExist');
 const getUploadFileExt = require('./utils/Upload/getUploadFileExt');
 const getUploadDirName = require('./utils/Upload/getUploadDirName');
@@ -21,6 +22,20 @@ const getUploadFileName = require('./utils/Upload/getUploadFileName');
 const index = require('./routes/index')
 const indexApi = require('./routes/api/index')
 const usersApi = require('./routes/api/users')
+
+// 跨域
+app.use(
+  cors({
+    origin: (ctx) => { //设置允许来自指定域名请求
+      return "*"
+    },
+    maxAge: 5, //指定本次预检请求的有效期，单位为秒。
+    credentials: true, //是否允许发送Cookie
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], //设置所允许的HTTP请求方法'
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept'], //设置服务器支持的所有头信息字段
+    exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'] //设置获取其他自定义字段
+  })
+);
 
 // error handler
 // onerror(app)
@@ -46,7 +61,8 @@ app.use(async (ctx, next) => {
 })
 
 // 错误状态码拦截
-app.use(errorHandle)
+app.use(routerResponse())
+//app.use(errorHandle())
 
 // Jwt权限验证
 app.use(koajwt({
@@ -83,20 +99,6 @@ app.use(koajwt({
 //     }
 //   }
 // }));
-
-// 跨域
-app.use(
-  cors({
-    origin: (ctx) => { //设置允许来自指定域名请求
-      return "*"
-    },
-    maxAge: 5, //指定本次预检请求的有效期，单位为秒。
-    credentials: true, //是否允许发送Cookie
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], //设置所允许的HTTP请求方法'
-    allowHeaders: ['Content-Type', 'Authorization', 'Accept'], //设置服务器支持的所有头信息字段
-    exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'] //设置获取其他自定义字段
-  })
-);
 
 // 路由
 app.use(index.routes(), index.allowedMethods())

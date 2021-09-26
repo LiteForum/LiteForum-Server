@@ -30,8 +30,8 @@ module.exports = {
         host: "127.0.0.1",
         port: "27017",
         database: "message",
-        username: "",
-        password: ""
+        username: "root",
+        password: "Alvin233"
     },
 
     Mail: {
@@ -40,9 +40,9 @@ module.exports = {
          * 在启用此功能之前请确保您的邮件配置正常
          * 并且发件驱动配置无需全部填写，只会生效一个
          */
-        Enable: false,
+        Enable: true,
         // 发件驱动（smtp/mailgun）
-        Drive: "smtp",
+        Drive: "mailgun",
 
         // 配置SMTP
         smtp: {
@@ -59,9 +59,9 @@ module.exports = {
 
         // 配置Mailgum
         mailgun: {
-            domain: "",
-            apikey: "",
-            from: ""
+            domain: "sp.kilins.com",
+            apikey: "key-1deb9b49d17e85af42c3b731e0bb68f6",
+            from: "noreply@kilins.com"
         },
     },
 

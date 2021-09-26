@@ -17,29 +17,26 @@ module.exports = {
 
         // 用户名特殊字符
         if (username_re.test(username)) {
-            return (ctx.body = res_state(false, "The user name cannot have special characters.", {}));
+            ctx.fail('The user name cannot have special characters.', -1)
         }
 
         let result = await UserModel.findOneAndUpdate({ $or: [{ username }, { email }] }, { last_online: new Date().getTime() })
 
         // 用户不存在
         if (!result) {
-            return (ctx.body = res_state(false, "User Not Found.", {}));
-        }
+            ctx.fail('User Not Found.', -1)
+        } else
 
-        // 密码不正确
-        if (sha256(password + HashSuffix) !== result.password) {
-            ctx.status = 400;
-
-            return (ctx.body = res_state(false, "Password Error.", {}));
-        }
-
-        const user = { username: result.username, authority: result.authority };
-        const token = jwt.sign(user, TokenSecretKey, { expiresIn: ExpiresIn });
-
-        ctx.body = res_state(true, null, {
-            token: token
-        });
+            // 密码不正确
+            if (sha256(password + HashSuffix) !== result.password) {
+                ctx.fail('Password Error.', -1)
+            } else {
+                const user = { username: result.username, authority: result.authority };
+                const token = jwt.sign(user, TokenSecretKey, { expiresIn: ExpiresIn });
+                ctx.success({
+                    token: token
+                })
+            }
     },
 
     // 发送注册验证码
@@ -53,12 +50,12 @@ module.exports = {
             }
 
             await makeEmailCaptcha(username, email, "Register").then(callback => {
-                return (ctx.body = res_state(true, "Send Success.", {}));
+                ctx.success({}, 'Email Send Success.')
             }).catch(callback => {
-                return (ctx.body = res_state(false, "Send Error.", {}));
+                ctx.fail('Email Send Error.', -1)
             })
         } else {
-            ctx.body = res_state(false, "Missing parameter.", {});
+            ctx.fail('Missing parameter.', -1)
         }
     },
 
@@ -73,12 +70,12 @@ module.exports = {
             }
 
             await makeEmailCaptcha(null, email, "iForgot").then(callback => {
-                return (ctx.body = res_state(true, "Send Success.", {}));
+                ctx.success({}, 'Email Send Success.')
             }).catch(callback => {
-                return (ctx.body = res_state(false, "Send Error.", {}));
+                ctx.fail('Email Send Error.', -1)
             })
         } else {
-            ctx.body = res_state(false, "Missing parameter.", {});
+            ctx.fail('Missing parameter.', -1)
         }
     },
 
@@ -90,15 +87,15 @@ module.exports = {
             if (result) {
                 let result2 = await UserModel.findOneAndUpdate(email, { password: sha256(password + HashSuffix) })
                 if (result2) {
-                    ctx.body = res_state(true, "Password reset successful.", {});
+                    ctx.success({}, 'Password reset successful.')
                 } else {
-                    ctx.body = res_state(false, "Password reset failed.", {});
+                    ctx.fail('Password reset failed.', -1)
                 }
             } else {
-                ctx.body = res_state(false, "Validation failed.", {});
+                ctx.fail("Validation failed", -1)
             }
         } else {
-            ctx.body = res_state(false, "Missing parameter.", {});
+            ctx.fail('Missing parameter.', -1)
         }
     },
 
@@ -110,63 +107,55 @@ module.exports = {
         username_re = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]");
 
         if (username_re.test(username)) {
-            return (ctx.body = res_state(false, "The user name cannot have special characters.", {}));
-        }
-
-        // 用户名小于4位
-        if (username.length < 4) {
-            return (ctx.body = res_state(false, "The length of user name must be more than 4 digits.", {}));
-        }
-
-        // 密码小于6位
-        if (password.length < 6) {
-            return (ctx.body = res_state(false, "The length of password must be more than 6 digits.", {}));
-        }
-
-        console.log(email_re.test(email));
-
-        if (!email_re.test(email)) {
-            return (ctx.body = res_state(false, "Incorrect email address format.", {}));
-        }
-
-        let user_find = await UserModel.findOne({ username });
-
-        if (user_find) {
-            return (ctx.body = res_state(false, "User already exists.", {}));
-        }
-
-        let email_find = await UserModel.findOne({ email });
-        console.log(email_find)
-
-        if (email_find) {
-            return (ctx.body = res_state(false, "Email address registered.", {}));
-        }
-
-        let user_data = {
-            id: uuidv4(),
-            username: username,
-            email: email,
-            password: sha256(password + HashSuffix),
-            avatar: null,
-            email_verify: false,
-            last_online: new Date().getTime(),
-            authority: 0,
-        }
-
-        let code_find = await EmailCaptchaModel.findOneAndRemove({ code })
-
-        if (EmailVerify && !code_find) {
-            return (ctx.body = res_state(false, "Validation failed, code does not exist.", {}));
+            ctx.fail("The user name cannot have special characters.", -1)
+        } else if (username.length < 4) {
+            ctx.fail("The length of user name must be more than 4 digits.", -1)
+        } else if (password.length < 6) {
+            ctx.fail("The length of password must be more than 6 digits.", -1)
+        } else if (!email_re.test(email)) {
+            ctx.fail("Incorrect email address format.", -1)
         } else {
-            user_data.email_verify = true;
-        }
+            let user_find = await UserModel.findOne({ username });
 
-        let create = await UserModel.create(user_data);
+            if (user_find) {
+                ctx.fail("User already exists.", -1)
+            }
 
-        if (create) {
-            ctx.body = res_state(true, "register was successful.", {});
-        } else {
-            ctx.body = res_state(false, "register has failed.", {});
+            let email_find = await UserModel.findOne({ email });
+            console.log(email_find)
+
+            if (email_find) {
+                ctx.fail("Email address registered.", -1)
+            }
+
+            if(!user_find && !email_find) {
+                let user_data = {
+                    id: uuidv4(),
+                    username: username,
+                    email: email,
+                    password: sha256(password + HashSuffix),
+                    avatar: null,
+                    email_verify: false,
+                    last_online: new Date().getTime(),
+                    authority: 0,
+                }
+    
+                let code_find = await EmailCaptchaModel.findOneAndRemove({ code })
+    
+                if (EmailVerify && !code_find) {
+                    ctx.fail("Validation failed, code does not exist.", -1)
+                } else {
+                    user_data.email_verify = true;
+                }
+    
+                let create = await UserModel.create(user_data);
+    
+                if (create) {
+                    ctx.success({}, "register was successful.")
+                } else {
+                    ctx.fail("register has failed.", -1)
+                }
+            }
         }
     },
 
@@ -176,9 +165,9 @@ module.exports = {
         if (username) {
             let result = await UserModel.findOne({ username }, { password: 0, email: 0, __v: 0, _id: 0 });
             if (result) {
-                ctx.body = res_state(true, "Request successful.", result);
+                ctx.success(result, "Request successful.")
             } else {
-                return (ctx.body = res_state(false, "User Not Found.", {}));
+                ctx.fail("User Not Found.", -1)
             }
         } else {
             if (ctx.request.header.authorization) {
@@ -188,16 +177,16 @@ module.exports = {
                         let result = await UserModel.findOne({ username: decoded.username }, { password: 0, email: 0, __v: 0, _id: 0 });
 
                         if (result) {
-                            ctx.body = res_state(true, "Request successful.", result);
+                            ctx.success(result, "Request successful.")
                         }
                     }
 
                     if (err) {
-                        ctx.body = res_state(false, "Missing parameter or token invalid.", {});
+                        ctx.fail("Missing parameter or token invalid.", -1)
                     }
                 });
             } else {
-                ctx.body = res_state(false, "Missing parameter.", {});
+                ctx.fail('Missing parameter.', -1)
             }
         }
     },
