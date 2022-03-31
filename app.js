@@ -6,7 +6,7 @@ const json = require('koa-json')
 const koaBody = require('koa-body')
 const cors = require('koa2-cors')
 const path = require('path')
-// const onerror = require('koa-onerror')
+    // const onerror = require('koa-onerror')
 const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const connectDB = require("./db/mongoose")
@@ -21,16 +21,16 @@ const usersApi = require('./routes/api/users')
 
 // 跨域
 app.use(
-  cors({
-    origin: (ctx) => { //设置允许来自指定域名请求
-      return "*"
-    },
-    maxAge: 5, //指定本次预检请求的有效期，单位为秒。
-    credentials: true, //是否允许发送Cookie
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], //设置所允许的HTTP请求方法'
-    allowHeaders: ['Content-Type', 'Authorization', 'Accept'], //设置服务器支持的所有头信息字段
-    exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'] //设置获取其他自定义字段
-  })
+    cors({
+        origin: (ctx) => { //设置允许来自指定域名请求
+            return "*"
+        },
+        maxAge: 5, //指定本次预检请求的有效期，单位为秒。
+        credentials: true, //是否允许发送Cookie
+        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], //设置所允许的HTTP请求方法'
+        allowHeaders: ['Content-Type', 'Authorization', 'Accept'], //设置服务器支持的所有头信息字段
+        exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'] //设置获取其他自定义字段
+    })
 );
 
 // error handler
@@ -45,15 +45,15 @@ app.use(require('koa-static')(__dirname + '/public'))
 app.use(require('koa-static')(__dirname + '/storage'))
 
 app.use(views(__dirname + '/views', {
-  extension: 'ejs'
+    extension: 'ejs'
 }))
 
 // logger
-app.use(async (ctx, next) => {
-  const start = new Date()
-  await next()
-  const ms = new Date() - start
-  console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
+app.use(async(ctx, next) => {
+    const start = new Date()
+    await next()
+    const ms = new Date() - start
+    console.log(`${ctx.method} ${ctx.url} - ${ms}ms`)
 })
 
 // 错误状态码拦截
@@ -62,9 +62,9 @@ app.use(routerResponse())
 
 // Jwt权限验证
 app.use(koajwt({
-  secret: TokenSecretKey
+    secret: TokenSecretKey
 }).unless({
-  path: NoAuthRouters
+    path: NoAuthRouters
 }));
 
 // 路由
@@ -78,7 +78,7 @@ app.use(usersApi.routes(), usersApi.allowedMethods())
 // });
 
 connectDB().then(() => {
-  console.info("DataBase Connect Success!");
+    console.info("DataBase Connect Success!");
 });
 
 module.exports = app

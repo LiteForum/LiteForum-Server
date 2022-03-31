@@ -11,46 +11,46 @@ const makeEmailCaptcha = require('../../utils/makeEmailCaptcha')
 
 module.exports = {
     async login(ctx) {
-        const { username, email, password } = ctx.request.body
+        const { userName, email, password } = ctx.request.body
 
-        username_re = new RegExp("[`~!@#$^&*()=|{}':',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]")
+        userName_re = new RegExp("[`~!@#$^&*()=|{}':',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]")
 
         // 用户名特殊字符
-        if (username_re.test(username)) {
+        if (userName_re.test(userName)) {
             ctx.fail('The user name cannot have special characters.', -1)
         }
 
-        let result = await UserModel.findOne({ $or: [{ username }, { email }] })
+        let result = await UserModel.findOne({ $or: [{ userName }, { email }] })
 
         // 用户不存在
         if (!result) {
             ctx.fail('User Not Found.', -1)
         } else
 
-            // 密码不正确
-            if (sha256(password + HashSuffix) !== result.password) {
-                ctx.fail('Password Error.', -1)
-            } else {
-                await UserModel.updateOne({ $or: [{ username }, { email }] }, { last_online: new Date().getTime() })
-                const user = { id: result.id, username: result.username, authority: result.authority }
-                const token = jwt.sign(user, TokenSecretKey, { expiresIn: ExpiresIn })
-                ctx.success({
-                    token: token
-                })
-            }
+        // 密码不正确
+        if (sha256(password + HashSuffix) !== result.password) {
+            ctx.fail('Password Error.', -1)
+        } else {
+            await UserModel.updateOne({ $or: [{ userName }, { email }] }, { last_online: new Date().getTime() })
+            const user = { id: result.id, userName: result.userName, authority: result.authority }
+            const token = jwt.sign(user, TokenSecretKey, { expiresIn: ExpiresIn })
+            ctx.success({
+                token: token
+            })
+        }
     },
 
     // 发送注册验证码
     async verifyEmailCaptchaSend(ctx) {
-        const { username, email } = ctx.request.body
+        const { userName, email } = ctx.request.body
 
-        if (username && email) {
-            let result = await EmailCaptchaModel.findOne({ $or: [{ username }, { email }] })
+        if (userName && email) {
+            let result = await EmailCaptchaModel.findOne({ $or: [{ userName }, { email }] })
             if (result) {
-                await EmailCaptchaModel.findOneAndRemove({ $or: [{ username }, { email }] })
+                await EmailCaptchaModel.findOneAndRemove({ $or: [{ userName }, { email }] })
             }
 
-            await makeEmailCaptcha(username, email, "Register").then(callback => {
+            await makeEmailCaptcha(userName, email, "Register").then(callback => {
                 ctx.success({}, 'Email Send Success.')
             }).catch(callback => {
                 ctx.fail('Email Send Error.', -1)
@@ -101,22 +101,22 @@ module.exports = {
     },
 
     async register(ctx) {
-        const { username, email, password, code } = ctx.request.body
+        const { userName, email, password, code } = ctx.request.body
 
         email_re = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/
 
-        username_re = new RegExp("[`~!@#$^&*()=|{}':',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]")
+        userName_re = new RegExp("[`~!@#$^&*()=|{}':',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？ ]")
 
-        if (username_re.test(username)) {
+        if (userName_re.test(userName)) {
             ctx.fail("The user name cannot have special characters.", -1)
-        } else if (username.length < 4) {
+        } else if (userName.length < 4) {
             ctx.fail("The length of user name must be more than 4 digits.", -1)
         } else if (password.length < 6) {
             ctx.fail("The length of password must be more than 6 digits.", -1)
         } else if (!email_re.test(email)) {
             ctx.fail("Incorrect email address format.", -1)
         } else {
-            let user_find = await UserModel.findOne({ username })
+            let user_find = await UserModel.findOne({ userName })
 
             if (user_find) {
                 ctx.fail("User already exists.", -1)
@@ -134,7 +134,8 @@ module.exports = {
             if (!user_find && !email_find) {
                 let user_data = {
                     id: id,
-                    username: username,
+                    name: userName,
+                    userName: userName,
                     email: email,
                     password: sha256(password + HashSuffix),
                     avatar: null,
@@ -166,10 +167,10 @@ module.exports = {
     },
 
     async getUserInfo(ctx) {
-        const { username } = ctx.query
+        const { userName } = ctx.query
 
-        if (username) {
-            let result = await UserModel.findOne({ username }, { password: 0, email: 0, __v: 0, _id: 0 })
+        if (userName) {
+            let result = await UserModel.findOne({ userName }, { password: 0, email: 0, __v: 0, _id: 0 })
             if (result) {
                 ctx.success(result, "Request successful.")
             } else {
@@ -178,9 +179,9 @@ module.exports = {
         } else {
             if (ctx.request.header.authorization) {
                 let token = ctx.request.header.authorization.split(" ")
-                await jwt.verify(token[1], TokenSecretKey, async (err, decoded) => {
+                await jwt.verify(token[1], TokenSecretKey, async(err, decoded) => {
                     if (decoded) {
-                        let result = await UserModel.findOne({ username: decoded.username }, { password: 0, email: 0, __v: 0, _id: 0 })
+                        let result = await UserModel.findOne({ userName: decoded.userName }, { password: 0, __v: 0, _id: 0 })
 
                         if (result) {
                             ctx.success(result, "Request successful.")

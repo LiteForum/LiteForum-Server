@@ -17,13 +17,13 @@ module.exports = {
         /\/storage/,
         /\/uploads/,
         /\/uploads\/(.*)/,
-        /\/api\/email\/verify/,
-        /\/api\/iforgot/,
-        /\/api\/iforgot\/(.*)/,
-        /\/api\/register/,
-        /\/api\/login/,
-        /\/api\/users\/oauth\/login\/(.*)/,
-        /\/api\/users\/info/,
+        /\/api\/user\/email\/verify/,
+        /\/api\/user\/iforgot/,
+        /\/api\/user\/iforgot\/(.*)/,
+        /\/api\/user\/register/,
+        /\/api\/user\/login/,
+        /\/api\/user\/oauth\/login\/(.*)/,
+        /\/api\/user\/userInfo/,
     ],
 
     // 数据库配置
@@ -32,7 +32,7 @@ module.exports = {
         port: "27017",
         database: "message",
         username: "root",
-        password: "Alvin233"
+        password: ""
     },
 
     Mail: {

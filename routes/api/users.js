@@ -3,9 +3,14 @@ const UserController = require('../../controllers/users/users')
 const OAuthController = require('../../controllers/users/oauth');
 const path = require('path')
 
-router.prefix('/api/users')
+router.prefix('/api/user')
 
-router.get('/info', UserController.getUserInfo);
+router.post("/login", UserController.login);
+router.post("/register", UserController.register);
+router.post("/email/verify/send", UserController.verifyEmailCaptchaSend);
+router.post("/iforgot/verify/send", UserController.iForgotCaptchaSend);
+router.post("/iforgot", UserController.iForgot);
+router.get('/userInfo', UserController.getUserInfo);
 
 // OAuth Bind
 router.post('/oauth/bind/wechat', OAuthController.wechat_auth);

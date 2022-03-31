@@ -4,21 +4,21 @@ const { Mail, EmailVerify } = require('../config');
 const { v4: uuidv4 } = require('uuid');
 
 // 生成验证码存储只数据库并发送到指定邮箱
-let makeEmailCaptcha = async (username, email, code_type) => {
-    return new Promise(async (resolve, reject) => {
+let makeEmailCaptcha = async(userName, email, code_type) => {
+    return new Promise(async(resolve, reject) => {
         if (EmailVerify && Mail.Enable) {
             let code = Math.random().toString(36).slice(-8);
 
             let code_data = {
                 id: uuidv4(),
-                username: username,
+                userName: userName,
                 email: email,
                 code: code,
                 code_type,
             }
 
             let tempdata = {
-                username,
+                userName,
                 code
             }
 

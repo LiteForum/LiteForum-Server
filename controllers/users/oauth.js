@@ -8,7 +8,7 @@ module.exports = {
     async wechat_auth(ctx) {
         const { code } = ctx.request.body
 
-        await wechatmini(code).then(async (res) => {
+        await wechatmini(code).then(async(res) => {
             if (res.errcode && res.errcode !== 0) {
                 ctx.fail("Bind Failed. Code Not Found.", -1)
             } else {
@@ -40,7 +40,7 @@ module.exports = {
     async wechat_auth_unbind(ctx) {
         const { code } = ctx.request.body
 
-        await wechatmini(code).then(async (res) => {
+        await wechatmini(code).then(async(res) => {
             if (res.errcode && res.errcode !== 0) {
                 ctx.fail("UnBind Failed. Code Not Found.", -1)
             } else {
@@ -67,7 +67,7 @@ module.exports = {
     async wechat_auth_login(ctx) {
         const { code } = ctx.request.body
 
-        await wechatmini(code).then(async (res) => {
+        await wechatmini(code).then(async(res) => {
             if (res.errcode && res.errcode !== 0) {
                 ctx.fail("Login Failed. Code Not Found.", -1)
             } else {
@@ -76,7 +76,7 @@ module.exports = {
                     let db2 = await UserModel.findOneAndUpdate({ id: db.id }, { last_online: new Date().getTime() })
 
                     if (db2) {
-                        const user = { id: db2.id, username: db2.username, authority: db2.authority }
+                        const user = { id: db2.id, userName: db2.userName, authority: db2.authority }
                         const token = jwt.sign(user, TokenSecretKey, { expiresIn: ExpiresIn })
                         ctx.success({
                             token: token

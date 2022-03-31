@@ -24,8 +24,7 @@ module.exports = (username, password) => {
 
 
         mongoose.connect(
-            URI,
-            { useUnifiedTopology: true, useFindAndModify: false, useNewUrlParser: true },
+            URI, { useUnifiedTopology: true, useFindAndModify: false, useNewUrlParser: true },
 
         );
         mongoose.connection.once("open", () => {
